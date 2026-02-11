@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { width: 340px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f8f9fa; color: #333; }
+    h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; font-size: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .badge { background: #e9ecef; color: #666; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
+
+    .swf-item {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      transition: transform 0.1s;
+    }
+    .swf-item:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+    .file-name { font-weight: 600; color: #d63384; /* Ruffle rengine yakın bir pembe/mor tonu */ font-size: 14px; display: block; word-break: break-all; margin-bottom: 4px; }
+    .url-text { font-size: 11px; color: #6c757d; margin-bottom: 10px; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+    button {
+      background-color: #ff8c00; /* Ruffle turuncusu */
+      color: white;
+      border: none;
+      padding: 8px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: 600;
+      font-size: 13px;
+      transition: background-color 0.2s;
+    }
+    button:hover { background-color: #e07b00; }
+    button:disabled { background-color: #adb5bd; cursor: not-allowed; }
+
+    .msg { font-size: 11px; text-align: center; margin-top: 8px; font-weight: 500; min-height: 16px; }
+    #status { color: #6c757d; font-size: 13px; text-align: center; margin-top: 30px; font-style: italic; }
+
+    footer { margin-top: 20px; font-size: 11px; text-align: center; color: #adb5bd; border-top: 1px solid #e9ecef; padding-top: 10px; font-weight: 600;}
+  </style>
+</head>
+<body>
+  <h3>Ruffle Grabber <span class="badge" id="count-badge">0</span></h3>
+
+  <div id="list"></div>
+  <div id="status">No SWF files detected yet.<br>Play a game to start sniffing.</div>
+
+  <footer>Ruffle SWF Grabber</footer>
+  <script src="popup.js"></script>
+</body>
+</html>
