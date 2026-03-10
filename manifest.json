@@ -34,7 +34,8 @@
       "matches": ["<all_urls>"],
       "js": ["ruffle_injector.js"],
       "run_at": "document_start",
-      "world": "MAIN"
+      "world": "MAIN",
+      "all_frames": true
     }
   ]
 }

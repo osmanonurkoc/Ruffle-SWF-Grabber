@@ -1,40 +1,128 @@
 /**
- * Ruffle SWF Grabber - Configuration Injector
- * * This script runs in the "MAIN" world, meaning it shares the same javascript
- * context as the webpage. This allows us to modify the `window.RufflePlayer`
- * object directly before the Ruffle emulator loads.
+ * Ruffle SWF Grabber - Strict Instance Injector
+ * Runs in the "MAIN" world to hijack Ruffle configurations at the element level.
  */
 
 (function() {
-    // Ensure the RufflePlayer configuration object exists
-    window.RufflePlayer = window.RufflePlayer || {};
-    window.RufflePlayer.config = window.RufflePlayer.config || {};
+    console.log("[Ruffle SWF Grabber] Injecting strict instance-level overrides...");
 
-    console.log("[Ruffle SWF Grabber] Injecting configuration overrides...");
+    // Helper: Force properties to always return true and ignore false assignments
+    const enforceTrue = (obj, prop) => {
+        Object.defineProperty(obj, prop, {
+            get: () => true,
+                              set: () => {}, // Silently ignore any attempt to set it to false
+                              configurable: true,
+                              enumerable: true
+        });
+    };
 
-    // 1. Force enable the "Download .swf" option in the right-click context menu
-    // This allows users to right-click the game and select "Download .swf"
-    window.RufflePlayer.config.showSwfDownload = true;
+    // Helper: Apply the forced properties to any config object
+    const patchConfig = (config) => {
+        const safeConfig = config || {};
+        enforceTrue(safeConfig, 'showSwfDownload');
+        enforceTrue(safeConfig, 'contextMenu');
+        return safeConfig;
+    };
 
-    // 2. Ensure the context menu itself is enabled
-    window.RufflePlayer.config.contextMenu = true;
+    // 1. PATCH GLOBAL OBJECT
+    // Fallback for older implementations using window.RufflePlayer
+    let internalRuffle = window.RufflePlayer || {};
+    let internalConfig = patchConfig(internalRuffle.config);
 
-    // 3. Attempt to lock these settings so the website cannot disable them later
-    // Some sites might try to set `showSwfDownload = false` in their own code.
-    // We use Object.defineProperty to make our changes read-only if possible.
-    try {
-        Object.defineProperty(window.RufflePlayer.config, "showSwfDownload", {
-            value: true,
-            writable: false,     // Prevent overwriting
-            configurable: false, // Prevent re-defining
-            enumerable: true
+    Object.defineProperty(internalRuffle, 'config', {
+        get: () => internalConfig,
+                          set: (newConfig) => {
+                              internalConfig = patchConfig(Object.assign({}, internalConfig, newConfig));
+                          },
+                          configurable: true,
+                          enumerable: true
+    });
+
+    Object.defineProperty(window, 'RufflePlayer', {
+        get: () => internalRuffle,
+                          set: (newValue) => {
+                              if (newValue && typeof newValue === 'object') {
+                                  let tempConfig = newValue.config;
+                                  newValue.config = patchConfig(Object.assign({}, internalConfig, tempConfig));
+                              }
+                              internalRuffle = newValue;
+                          },
+                          configurable: true
+    });
+
+    // 2. PATCH ELEMENT INSTANCES
+    // Hijack the specific <ruffle-player> DOM elements
+    const hijackRuffleElement = (element) => {
+        if (element._ruffleGrabberHijacked) return;
+        element._ruffleGrabberHijacked = true;
+
+        // Hijack the element's direct config property
+        let instanceConfig = patchConfig(element.config);
+        Object.defineProperty(element, 'config', {
+            get: () => instanceConfig,
+                              set: (newConfig) => {
+                                  instanceConfig = patchConfig(Object.assign({}, instanceConfig, newConfig));
+                              },
+                              configurable: true,
+                              enumerable: true
         });
 
-        console.log("[Ruffle SWF Grabber] Successfully locked download settings. Right-click download is enabled.");
-    } catch (err) {
-        // If locking fails (e.g. if the site defined it first), we just log it.
-        // The simple assignment above usually works for 99% of sites.
-        console.warn("[Ruffle SWF Grabber] Could not lock settings, but applied overrides.", err);
+        // Hijack the element's load() method
+        // Sites often pass { showSwfDownload: false } directly here
+        let originalLoad = element.load;
+        const patchedLoad = function(options) {
+            if (typeof options === 'object') {
+                options = patchConfig(options);
+            }
+            return originalLoad.apply(this, arguments);
+        };
+
+        // If load is already defined, wrap it. If not, define a setter to catch it later.
+        if (typeof originalLoad === 'function') {
+            element.load = patchedLoad;
+        } else {
+            Object.defineProperty(element, 'load', {
+                get: () => patchedLoad,
+                                  set: (newLoad) => {
+                                      if (typeof newLoad === 'function') {
+                                          originalLoad = newLoad;
+                                      }
+                                  },
+                                  configurable: true,
+                                  enumerable: true
+            });
+        }
+    };
+
+    // 3. INTERCEPT DOM CREATION (document.createElement)
+    // Catch elements before they are appended to the document
+    const originalCreateElement = document.createElement;
+    document.createElement = function() {
+        const element = originalCreateElement.apply(this, arguments);
+        if (arguments[0] && arguments[0].toLowerCase() === 'ruffle-player') {
+            hijackRuffleElement(element);
+        }
+        return element;
+    };
+
+    // 4. INTERCEPT DOM MUTATIONS (innerHTML injections)
+    // Catch elements added bypassing createElement
+    const observer = new MutationObserver((mutations) => {
+        for (let mutation of mutations) {
+            for (let node of mutation.addedNodes) {
+                if (node.nodeType === 1 && node.tagName && node.tagName.toLowerCase() === 'ruffle-player') {
+                    hijackRuffleElement(node);
+                }
+            }
+        }
+    });
+
+    if (document.documentElement) {
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+        });
     }
 
 })();

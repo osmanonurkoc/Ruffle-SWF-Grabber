@@ -6,6 +6,7 @@ A Chrome Extension that detects and downloads `.swf` (Flash) files from websites
 
 * **Auto Detection:** Automatically sniffs network traffic for `.swf` files.
 * **Context Injection:** Downloads files directly from the page context to bypass **Hotlink Protection** and **403 Forbidden** errors.
+* **Native Menu Unlock:** Forcibly unlocks Ruffle's native "Download .swf" right-click context menu by bypassing strict site-level configuration blocks and dynamically added players.
 * **One-Click:** Simple interface to grab the game file instantly.
 
 ## 🛠 Installation
