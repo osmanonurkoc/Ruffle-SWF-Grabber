@@ -3,6 +3,8 @@
   "name": "Ruffle SWF Grabber",
   "version": "1.1.0",
   "description": "Detects SWF files, enables Ruffle's native download menu, and provides a direct download manager.",
+  "author": "Osman Onur Koç (@osmanonurkoc)",
+  "homepage_url": "https://osmanonurkoc.com",
   "permissions": [
     "webRequest",
     "storage",
