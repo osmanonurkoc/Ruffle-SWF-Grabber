@@ -15,6 +15,7 @@
     "<all_urls>"
   ],
   "background": {
+    "scripts": ["background.js"],
     "service_worker": "background.js"
   },
   "action": {
@@ -39,5 +40,16 @@
       "world": "MAIN",
       "all_frames": true
     }
-  ]
+  ],
+"browser_specific_settings": {
+  "gecko": {
+    "id": "@antiruffle-1234567890",
+    "data_collection_permissions": {
+      "required": [
+        "none"
+      ]
+    },
+    "strict_min_version": "109.0"
+  }
+}
 }

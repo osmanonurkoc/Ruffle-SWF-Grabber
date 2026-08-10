@@ -1,6 +1,6 @@
 # Ruffle SWF Grabber 🎮
 
-A Chrome Extension that detects and downloads `.swf` (Flash) files from websites using Ruffle emulation.
+A Firefox & Chrome Extension that detects and downloads `.swf` (Flash) files from websites using Ruffle emulation.
 
 ## 🚀 Features
 
@@ -10,7 +10,13 @@ A Chrome Extension that detects and downloads `.swf` (Flash) files from websites
 * **One-Click:** Simple interface to grab the game file instantly.
 
 ## 🛠 Installation
+  For Firefox:
+1. Download from releases .xpi
+2. Open Firefox and go to `about:config`
+3. set xpinstall.signatures.required to false and restart the browser.
+4. Go to `about:addons`; click gear icon then load from file.
 
+  For Chrome:
 1.  Clone this repository.
 2.  Open Chrome and go to `chrome://extensions/`.
 3.  Enable **Developer mode**.
